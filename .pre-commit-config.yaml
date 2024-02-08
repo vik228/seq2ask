@@ -1,0 +1,60 @@
+repos:
+  - repo: https://github.com/asottile/reorder_python_imports
+    rev: v3.0.1
+    hooks:
+      - id: reorder-python-imports
+        args: [--py37-plus, --add-import, "from __future__ import annotations"]
+  - repo: https://github.com/pre-commit/mirrors-yapf
+    rev: v0.32.0
+    hooks:
+      - id: yapf
+        entry: bash -c 'yapf "$@"; git add -u' --
+        args:
+          - -i
+          - --style=google
+  #        args: [indent_dictionary_value = true, ALLOW_SPLIT_BEFORE_DICT_VALUE = false]
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.2.0
+    hooks:
+      - id: trailing-whitespace
+      - id: check-ast
+      - id: check-added-large-files
+      - id: requirements-txt-fixer
+      - id: sort-simple-yaml
+      - id: check-case-conflict
+      - id: check-builtin-literals
+      - id: check-byte-order-marker
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-yaml
+      - id: detect-private-key
+      - id: debug-statements
+      - id: check-json
+      - id: name-tests-test
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v2.32.0
+    hooks:
+      - id: pyupgrade
+        args: [--py37-plus]
+  - repo: https://github.com/pre-commit/mirrors-autopep8
+    rev: v1.6.0
+    hooks:
+      - id: autopep8
+        entry: bash -c 'autopep8 "$@"; git add -u' --
+  - repo: https://github.com/PyCQA/flake8
+    rev: 4.0.1
+    hooks:
+      - id: flake8
+        args: ["--max-line-length=150", "--config=setup.cfg"]
+  # - repo: local
+  #   hooks:
+  #     - id: pytest-check
+  #       name: pytest-check
+  #       entry: pytest
+  #       language: system
+  #       pass_filenames: false
+  #       always_run: true
+  # - repo: https://github.com/pre-commit/mirrors-pylint
+  #   rev: v3.0.0a4
+  #   hooks:
+  #     - id: pylint

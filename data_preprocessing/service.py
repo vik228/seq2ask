@@ -1,5 +1,12 @@
 from __future__ import annotations
 
+import numpy as np
+from env import bucket_path_answers
+from env import bucket_path_contexts
+from env import bucket_path_contexts_and_questions
+from env import bucket_path_questions
+from utils import upload_to_gcs
+
 
 class Service:
 
@@ -13,8 +20,10 @@ class Service:
         filename = self.data_loader.train_file if self.mode == 'train' else self.data_loader.dev_file
         return self.data_loader.load_squad_data(filename)
 
-    def prepare_squad_training_input(self, combine_context_and_questions=False):
+    def prepare_squad_training_input(self, combine_context_and_questions):
         contexts, questions, answers = self.load_data()
+        combined_data = contexts + questions + answers
+        self.data_preprocessor.fit_on_texts(combined_data)
         if combine_context_and_questions:
             inputs = [
                 context + self.data_preprocessor.context_question_seperator +
@@ -22,7 +31,17 @@ class Service:
             ]
             input_sequence = self.data_preprocessor.preprocess(inputs)
             output_sequence = self.data_preprocessor.preprocess(answers)
-            return input_sequence, output_sequence
-        return self.data_preprocessor.preprocess(
-            contexts), self.data_preprocessor.preprocess(
-                questions), self.data_preprocessor.preprocess(answers)
+            np.save('data/input_sequence.npy', input_sequence)
+            np.save('data/output_sequence.npy', output_sequence)
+            upload_to_gcs('data/input_sequence.npy',
+                          bucket_path_contexts_and_questions)
+            upload_to_gcs('data/output_sequence.npy', bucket_path_answers)
+        contexts_seq = self.data_preprocessor.preprocess(contexts)
+        questions_seq = self.data_preprocessor.preprocess(questions)
+        answers_seq = self.data_preprocessor.preprocess(answers)
+        np.save('data/contexts_seq.npy', contexts_seq)
+        np.save('data/questions_seq.npy', questions_seq)
+        np.save('data/answers_seq.npy', answers_seq)
+        upload_to_gcs('data/contexts_seq.npy', bucket_path_contexts)
+        upload_to_gcs('data/questions_seq.npy', bucket_path_questions)
+        upload_to_gcs('data/answers_seq.npy', bucket_path_answers)

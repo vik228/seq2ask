@@ -1,1 +1,11 @@
-venv/
+.env
+__pycache__
+insights
+insight
+venv
+env.yml
+data/
+custom/
+*.pkl
+.jupyter_notebook_config.py.swp
+*.json

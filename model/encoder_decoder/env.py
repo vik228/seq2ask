@@ -14,6 +14,6 @@ bucket_name = 'seq-to-ask-data'
 bucket_path_contexts_and_questions = 'squad-data/processed/contexts_and_questions.npy'
 bucket_path_decoder_input = 'squad-data/processed/decoder_input_seq.npy'
 bucket_path_decoder_output = 'squad-data/processed/decoder_output_seq.npy'
-
 bucket_path_questions = 'squad-data/processed/questions.npy'
 bucket_path_contexts = 'squad-data/processed/contexts.npy'
+bucket_path_model = 'squad-data/processed/model/'

@@ -33,7 +33,7 @@ class Preprocessor():
     def fit_on_texts(self, texts):
         self.tokenizer.fit_on_texts(texts)
 
-    def preprocess(self, texts):
-        data_seq = [self.text_to_sequence(text) for text in texts]
+    def preprocess(self, texts, **kwargs):
+        data_seq = [self.text_to_sequence(text, **kwargs) for text in texts]
         data_seq_padded = [self.pad_sequence(seq) for seq in data_seq]
         return data_seq_padded

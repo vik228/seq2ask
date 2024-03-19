@@ -23,5 +23,5 @@ class Optimizer:
 
     def save_model(self, model_path):
         self.model.save(model_path)
-        model_bucket_path = f"{self.model_bucket_path}/{self.model_name}.h5"
+        model_bucket_path = f"{self.model_bucket_path}{self.model_name}"
         upload_to_gcs(model_path, model_bucket_path)

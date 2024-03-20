@@ -10,35 +10,23 @@ from service import Service as DataPreprocessingService
 
 if __name__ == '__main__':
     set_env_vars()
+    cli_args = [
+        ('--max_vocab_length', 'Maximum number of words in vocabulary.'),
+        ('--max_seq_len', 'Maximum length of sequence.'),
+        ('--sample_size', 'Number of samples to use for training.'),
+        ('--input_seq_path', 'Path to input sequence csv file.'),
+        ('--decoder_input_path', 'Path to decoder input sequence csv file.'),
+        ('--decoder_output_path', 'Path to decoder output sequence csv file.'),
+    ]
     parser = argparse.ArgumentParser(
-        description='Prepare data for training SV forecasting model.')
-    parser.add_argument('--max_vocab_length',
-                        type=str,
-                        default=50000,
-                        help='Maximum number of words in vocabulary.')
-
-    parser.add_argument('--max_seq_len',
-                        type=str,
-                        default=300,
-                        help='Maximum length of sequence.')
-
-    parser.add_argument('--sample_size',
-                        type=str,
-                        default=None,
-                        help='Number of samples to use for training.')
-    parser.add_argument('--input_seq_path',
-                        type=str,
-                        default='data/input_seq.csv',
-                        help='Path to input sequence csv file.')
-    parser.add_argument('--decoder_input_path',
-                        type=str,
-                        default='data/decoder_input.csv',
-                        help='Path to decoder input sequence csv file.')
-    parser.add_argument('--decoder_output_path',
-                        type=str,
-                        default='data/decoder_output.csv',
-                        help='Path to decoder output sequence csv file.')
-
+        description='Prepare data for training seq2ask model.')
+    for arg in cli_args:
+        parser.add_argument(
+            arg[0],
+            type=str,
+            default=None,
+            help=arg[1],
+        )
     args = parser.parse_args()
     max_vocab_size = int(args.max_vocab_length)
     max_seq_len = int(args.max_seq_len)

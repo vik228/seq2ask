@@ -33,9 +33,9 @@ if __name__ == '__main__':
             help=arg[1],
         )
     args = parser.parse_args()
-    input_sequence = np.load(args.input_seq_path)
-    decoder_input_sequence = np.load(args.decoder_input_path)
-    decoder_output_sequence = np.load(args.decoder_output_path)
+    input_sequence = np.load(f"{args.input_seq_path}.npy")
+    decoder_input_sequence = np.load(f"{args.decoder_input_path}.npy")
+    decoder_output_sequence = np.load(f"{args.decoder_output_path}.npy")
     X_train, X_test, y_decoder_input_padded_train, y_decoder_input_padded_test, y_decoder_target_padded_train, y_decoder_target_padded_test = train_test_split(
         input_sequence,
         decoder_input_sequence,
@@ -52,7 +52,7 @@ if __name__ == '__main__':
                                     y_decoder_target_padded_train)
     val_generator = DataGenerator(X_val, y_decoder_input_padded_val,
                                   y_decoder_target_padded_val)
-    Path.mkdir("data", exist_ok=True)
+    Path("data").mkdir(exist_ok=True)
     download_blob(
         bucket_name=bucket_name,
         source_blob_name=args.model_params_bucket_path,

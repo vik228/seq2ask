@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import argparse
+import logging
 
 import numpy as np
 from data_loader import DataLoader
 from env import set_env_vars
 from preprocessor import Preprocessor
 from service import Service as DataPreprocessingService
+
+logger = logging.getLogger(__name__)
 
 if __name__ == '__main__':
     set_env_vars()
@@ -41,6 +44,9 @@ if __name__ == '__main__':
                                        data_preprocessor=data_preprocessor)
     input_seq, decoder_iputs, decoder_outputs = service.prepare_squad_training_input(
         combine_context_and_questions=True)
+    logger.info(f"Saving input_seq to {args.input_seq_path}")
+    logger.info(f"Saving decoder_inputs to {args.decoder_input_path}")
+    logger.info(f"Saving decoder_outputs to {args.decoder_output_path}")
     np.save(args.input_seq_path, input_seq)
     np.save(args.decoder_input_path, decoder_iputs)
     np.save(args.decoder_output_path, decoder_outputs)

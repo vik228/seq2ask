@@ -7,8 +7,7 @@ class Service:
                  data_loader,
                  input_data_preprocessor,
                  output_data_preprocessor,
-                 mode='train',
-                 **kwargs) -> None:
+                 mode='train') -> None:
         self.data_loader = data_loader
         self.input_data_preprocessor = input_data_preprocessor
         self.output_data_preprocessor = output_data_preprocessor

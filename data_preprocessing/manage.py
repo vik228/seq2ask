@@ -14,12 +14,18 @@ logger = logging.getLogger(__name__)
 if __name__ == '__main__':
     set_env_vars()
     cli_args = [
-        ('--input_max_vocab_length', 'Maximum number of words in vocabulary.'),
-        ('--max_seq_len', 'Maximum length of sequence.'),
+        ('--input_max_vocab_length',
+         'Maximum number of words in input vocabulary.'),
+        ('--output_max_vocab_length',
+         'Maximum number of words in output vocabulary.'),
+        ('--input_max_seq_len', 'Maximum length of sequence of input.'),
+        ('--output_max_seq_len', 'Maximum length of sequence of output.'),
+        ('--max_context_len', 'Maximum length of context.'),
+        ('--max_question_len', 'Maximum length of question.'),
+        ('--max_answer_len', 'Maximum length of answer.'),
         ('--sample_size', 'Number of samples to use for training.'),
-        ('--input_seq_path', 'Path to input sequence csv file.'),
-        ('--decoder_input_path', 'Path to decoder input sequence csv file.'),
-        ('--decoder_output_path', 'Path to decoder output sequence csv file.'),
+        ('--input_seq_path', 'Path to input sequence numpy file.'),
+        ('--output_seq_path', 'Path to output sequence numpy file.'),
     ]
     parser = argparse.ArgumentParser(
         description='Prepare data for training seq2ask model.')
@@ -31,22 +37,26 @@ if __name__ == '__main__':
             help=arg[1],
         )
     args = parser.parse_args()
-    max_vocab_size = int(args.max_vocab_length)
-    max_seq_len = int(args.max_seq_len)
+    input_max_vocab_length = int(args.input_max_vocab_length)
+    output_max_vocab_length = int(args.output_max_vocab_length)
+    input_max_seq_len = int(args.input_max_seq_len)
+    output_max_seq_len = int(args.output_max_seq_len)
     sample_size = args.sample_size
-    if sample_size:
-        data_loader = DataLoader(sample_size=int(sample_size))
-    else:
-        data_loader = DataLoader()
-    data_preprocessor = Preprocessor(max_vocab_size=max_vocab_size,
-                                     max_seq_len=max_seq_len)
-    service = DataPreprocessingService(data_loader=data_loader,
-                                       data_preprocessor=data_preprocessor)
-    input_seq, decoder_iputs, decoder_outputs = service.prepare_squad_training_input(
-    )
+    data_loader = DataLoader(sample_size=int(sample_size),
+                             max_context_len=int(args.max_context_len),
+                             max_question_len=int(args.max_question_len),
+                             max_answer_len=int(args.max_answer_len))
+    input_data_preprocessor = Preprocessor(
+        max_vocab_size=input_max_vocab_length, max_seq_len=input_max_seq_len)
+    output_data_preprocessor = Preprocessor(
+        max_vocab_size=output_max_vocab_length, max_seq_len=output_max_seq_len)
+
+    service = DataPreprocessingService(
+        data_loader=data_loader,
+        input_data_preprocessor=input_data_preprocessor,
+        output_data_preprocessor=output_data_preprocessor)
+    input_seq, output_seq = service.prepare_squad_training_input()
     logger.info(f"Saving input_seq to {args.input_seq_path}")
-    logger.info(f"Saving decoder_inputs to {args.decoder_input_path}")
-    logger.info(f"Saving decoder_outputs to {args.decoder_output_path}")
+    logger.info(f"Saving output_seq to {args.output_seq_path}")
     np.save(args.input_seq_path, input_seq)
-    np.save(args.decoder_input_path, decoder_iputs)
-    np.save(args.decoder_output_path, decoder_outputs)
+    np.save(args.decoder_output_path, output_seq)

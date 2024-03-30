@@ -6,14 +6,12 @@ import tensorflow as tf
 
 class DataGenerator(tf.keras.utils.Sequence):
 
-    def __init__(self,
-                 input_padded,
-                 decoder_input_padded,
-                 decoder_target_padded,
-                 batch_size=32):
-        self.input_padded = input_padded
-        self.decoder_input_padded = decoder_input_padded
-        self.decoder_target_padded = decoder_target_padded
+    def __init__(self, input_seq, output_seq, batch_size=32):
+        self.input_seq = input_seq
+        self.output_seq = output_seq
+        self.batch_size = batch_size
+        self.decoder_input_padded = [seq[:-1] for seq in self.output_seq]
+        self.decoder_target_padded = [seq[1:] for seq in self.output_seq]
         self.indexes = np.arange(len(self.input_padded))
         self.batch_size = batch_size
 

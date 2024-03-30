@@ -1,13 +1,18 @@
 from __future__ import annotations
 
 import argparse
+import json
 import logging
+from pathlib import Path
 
 import numpy as np
 from data_loader import DataLoader
+from env import input_tokenizer_bucket_path
+from env import output_tokenizer_bucket_path
 from env import set_env_vars
 from preprocessor import Preprocessor
 from service import Service as DataPreprocessingService
+from utils import upload_to_gcs
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +41,7 @@ if __name__ == '__main__':
             default=None,
             help=arg[1],
         )
+    Path("data").mkdir(exist_ok=True)
     args = parser.parse_args()
     input_max_vocab_length = int(args.input_max_vocab_length)
     output_max_vocab_length = int(args.output_max_vocab_length)
@@ -60,3 +66,11 @@ if __name__ == '__main__':
     logger.info(f"Saving output_seq to {args.output_seq_path}")
     np.save(args.input_seq_path, input_seq)
     np.save(args.decoder_output_path, output_seq)
+    input_tokenizer = input_data_preprocessor.tokenizer.to_json()
+    output_tokenizer = output_data_preprocessor.tokenizer.to_json()
+    with open("data/input_tokenizer.json", "w") as f:
+        f.write(json.dumps(input_tokenizer, ensure_ascii=False, indent=4))
+    with open("data/output_tokenizer.json", "w") as f:
+        f.write(json.dumps(output_tokenizer, ensure_ascii=False, indent=4))
+    upload_to_gcs("data/input_tokenizer.json", input_tokenizer_bucket_path)
+    upload_to_gcs("data/output_tokenizer.json", output_tokenizer_bucket_path)

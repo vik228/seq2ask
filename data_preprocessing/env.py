@@ -11,9 +11,5 @@ def set_env_vars():
 
 
 bucket_name = 'seq-to-ask-data'
-bucket_path_contexts_and_questions = 'squad-data/processed/contexts_and_questions.npy'
-bucket_path_decoder_input = 'squad-data/processed/decoder_input_seq.npy'
-bucket_path_decoder_output = 'squad-data/processed/decoder_output_seq.npy'
-
-bucket_path_questions = 'squad-data/processed/questions.npy'
-bucket_path_contexts = 'squad-data/processed/contexts.npy'
+input_tokenizer_bucket_path = 'squad-data/processed/input_tokenizer'
+output_tokenizer_bucket_path = 'squad-data/processed/output_tokenizer'

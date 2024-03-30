@@ -58,10 +58,14 @@ if __name__ == '__main__':
     training_params['validation_generator'] = val_generator
     print("Training Params are %s" % training_params)
     model_name = f"encoder_decoder_model_v{args.version}.h5"
+    encoder_model_name = f"encoder_model_v{args.version}.h5"
+    decoder_model_name = f"decoder_model_v{args.version}.h5"
     print("Model name is %s" % model_name)
     model_optimizer = Optimizer(model_params=model_params,
                                 training_params=training_params,
                                 model_bucket_path=bucket_path_model,
                                 model_name=model_name)
     model_optimizer.build_and_train_model()
-    model_optimizer.save_model(f"data/{model_name}")
+    model_optimizer.save_model(f"data/{model_name}",
+                               f"data/{encoder_model_name}",
+                               f"data/{decoder_model_name}")

@@ -62,10 +62,8 @@ if __name__ == '__main__':
         input_data_preprocessor=input_data_preprocessor,
         output_data_preprocessor=output_data_preprocessor)
     input_seq, output_seq = service.prepare_squad_training_input()
-    logger.info(f"Saving input_seq to {args.input_seq_path}")
-    logger.info(f"Saving output_seq to {args.output_seq_path}")
     np.save(args.input_seq_path, input_seq)
-    np.save(args.decoder_output_path, output_seq)
+    np.save(args.output_seq_path, output_seq)
     input_tokenizer = input_data_preprocessor.tokenizer.to_json()
     output_tokenizer = output_data_preprocessor.tokenizer.to_json()
     with open("data/input_tokenizer.json", "w") as f:

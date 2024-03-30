@@ -12,18 +12,18 @@ class DataGenerator(tf.keras.utils.Sequence):
         self.batch_size = batch_size
         self.decoder_input_padded = [seq[:-1] for seq in self.output_seq]
         self.decoder_target_padded = [seq[1:] for seq in self.output_seq]
-        self.indexes = np.arange(len(self.input_padded))
+        self.indexes = np.arange(len(self.input_seq))
         self.batch_size = batch_size
 
     def on_epoch_end(self):
         np.random.shuffle(self.indexes)
 
     def __len__(self):
-        return len(self.input_padded) // self.batch_size
+        return len(self.input_seq) // self.batch_size
 
     def __getitem__(self, idx):
-        encoder_input_seq = self.input_padded[idx * self.batch_size:(idx + 1) *
-                                              self.batch_size]
+        encoder_input_seq = self.input_seq[idx * self.batch_size:(idx + 1) *
+                                           self.batch_size]
         decoder_input_seq = self.decoder_input_padded[idx *
                                                       self.batch_size:(idx +
                                                                        1) *

@@ -11,5 +11,5 @@ def set_env_vars():
 
 
 bucket_name = 'seq-to-ask-data'
-input_tokenizer_bucket_path = 'squad-data/processed/input_tokenizer'
-output_tokenizer_bucket_path = 'squad-data/processed/output_tokenizer'
+input_tokenizer_bucket_path = 'squad-data/processed/input_tokenizer.json'
+output_tokenizer_bucket_path = 'squad-data/processed/output_tokenizer.json'

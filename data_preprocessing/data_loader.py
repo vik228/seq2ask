@@ -69,7 +69,7 @@ class DataLoader():
                 if len(tokenized_question) > self.max_question_len:
                     continue
                 for answer in qa['answers']:
-                    tokenized_answer = nltk.word_tokenized(answer['text'])
+                    tokenized_answer = nltk.word_tokenize(answer['text'])
                     if len(tokenized_answer) > self.max_answer_len:
                         continue
                     contexts.append(context)

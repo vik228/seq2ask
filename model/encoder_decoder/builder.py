@@ -73,6 +73,17 @@ class Builder:
                 x = layer(x)
         return input_layer, x
 
+    def configure_optimizer(self, optimizer_config):
+        optimizer_mapping = {'adam': Adam, 'rmsprop': RMSprop, 'sgd': SGD}
+        optimizer_class = optimizer_mapping.get(
+            optimizer_config['type'].lower())
+        if optimizer_class is None:
+            raise ValueError(
+                f"Optimizer {optimizer_config['type']} not supported")
+        optimizer = optimizer_class(
+            **{k: v for k, v in optimizer_config.items() if k != 'type'})
+        return optimizer
+
     def build_model(self):
         enc_inputs, enc_outputs = self.build_from_config(
             self.model_params['layer_config'].get('encoder', []), 'encoder',
@@ -80,6 +91,10 @@ class Builder:
 
         encoder_outputs, state_h, state_c = enc_outputs
         encoder_states = [state_h, state_c]  # Assuming LSTM for simplicity
+        encoder_model = Model(inputs=enc_inputs,
+                              outputs=encoder_states,
+                              name='encoder_model')
+
         dec_inputs, dec_outputs = self.build_from_config(
             self.model_params['layer_config'].get('decoder', []),
             'decoder',
@@ -93,6 +108,9 @@ class Builder:
                 'name': 'output_layer'
             })
         output_layer = Dense(**output_layer_config)(decoder_outputs)
+        decoder_model = Model(inputs=[dec_inputs] + encoder_states,
+                              outputs=output_layer,
+                              name='decoder_model')
 
         model = Model(inputs=[enc_inputs, dec_inputs],
                       outputs=output_layer,
@@ -103,18 +121,9 @@ class Builder:
             'type': 'adam',
             'learning_rate': 0.001
         })
-        optimizer_class = self.layer_mapping.get(optimizer_config['type'])
-        if optimizer_class is None:
-            optimizer_mapping = {'adam': Adam, 'rmsprop': RMSprop, 'sgd': SGD}
-            optimizer_class = optimizer_mapping.get(
-                optimizer_config['type'].lower())
-        if optimizer_class is None:
-            raise ValueError(
-                f"Optimizer {optimizer_config['type']} not supported")
-        optimizer = optimizer_class(
-            **{k: v for k, v in optimizer_config.items() if k != 'type'})
+        optimizer = self.configure_optimizer(optimizer_config)
         model.compile(optimizer=optimizer,
                       loss=self.model_params.get(
                           'loss', 'sparse_categorical_crossentropy'),
                       metrics=self.model_params.get('metrics', ['accuracy']))
-        return model
+        return model, encoder_model, decoder_model

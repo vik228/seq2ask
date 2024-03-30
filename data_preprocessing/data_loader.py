@@ -4,7 +4,10 @@ import json
 import pathlib
 import random
 
+import nltk
 import requests
+
+nltk.download("punkt")
 
 
 class DataLoader():
@@ -13,7 +16,10 @@ class DataLoader():
         assert version in ['1.1',
                            '2.0'], "Version must be either '1.1' or '2.0'"
         self.version = version
-        self.sample_size = kwargs.get('sample_size', None)
+        self.sample_size = kwargs.get('sample_size', 10000)
+        self.max_context_len = kwargs.get('max_context_len', 900)
+        self.max_question_len = kwargs.get('max_question_len', 70)
+        self.max_answer_len = kwargs.get('max_answer_len', 30)
 
     def download_squad(self):
         squad_base_url = "https://rajpurkar.github.io/SQuAD-explorer/dataset/"
@@ -43,9 +49,8 @@ class DataLoader():
             paragraph for group in squad_dict['data']
             for paragraph in group['paragraphs']
         ]
-
         # Randomly sample paragraphs based on the sample_size
-        if self.sample_size:
+        if self.sample_size < len(all_paragraphs):
             sampled_paragraphs = random.sample(
                 all_paragraphs, self.sample_size)
         else:
@@ -55,9 +60,18 @@ class DataLoader():
         answers = []
         for paragraph in sampled_paragraphs:
             context = paragraph['context']
+            tokenized_context = nltk.word_tokenize(context)
+            if len(tokenized_context) > self.max_context_len:
+                continue
             for qa in paragraph['qas']:
                 question = qa['question']
+                tokenized_question = nltk.word_tokenize(question)
+                if len(tokenized_question) > self.max_question_len:
+                    continue
                 for answer in qa['answers']:
+                    tokenized_answer = nltk.word_tokenized(answer['text'])
+                    if len(tokenized_answer) > self.max_answer_len:
+                        continue
                     contexts.append(context)
                     questions.append(question)
                     answers.append(answer['text'])

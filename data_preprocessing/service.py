@@ -3,33 +3,46 @@ from __future__ import annotations
 
 class Service:
 
-    def __init__(self, data_loader, data_preprocessor, mode='train') -> None:
+    def __init__(self,
+                 data_loader,
+                 input_data_preprocessor,
+                 output_data_preprocessor,
+                 mode='train',
+                 **kwargs) -> None:
         self.data_loader = data_loader
-        self.data_preprocessor = data_preprocessor
+        self.input_data_preprocessor = input_data_preprocessor
+        self.output_data_preprocessor = output_data_preprocessor
         self.mode = mode
+        self.context_question_seperator = '<SEP>'
+        self.answer_start = '<START>'
+        self.answer_end = '<END>'
 
     def load_data(self):
         self.data_loader.download_squad()
         filename = self.data_loader.train_file if self.mode == 'train' else self.data_loader.dev_file
         return self.data_loader.load_squad_data(filename)
 
-    def prepare_squad_training_input(self, combine_context_and_questions):
+    def prepare_input(self, contexts, questions):
+        all_input = contexts + questions
+        self.input_data_preprocessor.fit_on_texts(all_input)
+        inputs = [
+            f"{context} {self.context_question_seperator} {question}"
+            for context, question in zip(contexts, questions)
+        ]
+        input_sequence = self.input_data_preprocessor.preprocess(inputs)
+        return input_sequence
+
+    def prepare_output(self, answers):
+        self.output_data_preprocessor.fit_on_texts(answers)
+        outputs = [
+            f"{self.answer_start} {answer} {self.answer_end}"
+            for answer in answers
+        ]
+        output_sequences = self.output_data_preprocessor.preprocess(outputs)
+        return output_sequences
+
+    def prepare_squad_training_input(self):
         contexts, questions, answers = self.load_data()
-        combined_data = contexts + questions + answers
-        self.data_preprocessor.fit_on_texts(combined_data)
-        if combine_context_and_questions:
-            inputs = [
-                context + self.data_preprocessor.context_question_seperator +
-                question for context, question in zip(contexts, questions)
-            ]
-            input_sequence = self.data_preprocessor.preprocess(inputs)
-            output_sequence = self.data_preprocessor.preprocess(answers,
-                                                                is_answer=True)
-            decoder_inputs = [seq[:-1] for seq in output_sequence]
-            decoder_outputs = [seq[1:] for seq in output_sequence]
-            return input_sequence, decoder_inputs, decoder_outputs
-        else:
-            contexts_seq = self.data_preprocessor.preprocess(contexts)
-            questions_seq = self.data_preprocessor.preprocess(questions)
-            answers_seq = self.data_preprocessor.preprocess(answers)
-            return contexts_seq, questions_seq, answers_seq
+        input_sequence = self.prepare_input(contexts, questions)
+        output_sequences = self.prepare_output(answers)
+        return input_sequence, output_sequences

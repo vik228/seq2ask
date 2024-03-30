@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 if __name__ == '__main__':
     set_env_vars()
     cli_args = [
-        ('--max_vocab_length', 'Maximum number of words in vocabulary.'),
+        ('--input_max_vocab_length', 'Maximum number of words in vocabulary.'),
         ('--max_seq_len', 'Maximum length of sequence.'),
         ('--sample_size', 'Number of samples to use for training.'),
         ('--input_seq_path', 'Path to input sequence csv file.'),
@@ -43,7 +43,7 @@ if __name__ == '__main__':
     service = DataPreprocessingService(data_loader=data_loader,
                                        data_preprocessor=data_preprocessor)
     input_seq, decoder_iputs, decoder_outputs = service.prepare_squad_training_input(
-        combine_context_and_questions=True)
+    )
     logger.info(f"Saving input_seq to {args.input_seq_path}")
     logger.info(f"Saving decoder_inputs to {args.decoder_input_path}")
     logger.info(f"Saving decoder_outputs to {args.decoder_output_path}")

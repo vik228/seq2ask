@@ -19,9 +19,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Model training for seq2ask.')
     cl_args = [
         ('--version', 'Model Versioning.'),
-        ('--input_seq_path', 'Path to input sequence csv file.'),
-        ('--decoder_input_path', 'Path to decoder input sequence csv file.'),
-        ('--decoder_output_path', 'Path to decoder output sequence csv file.'),
+        ('--input_seq_path', 'Path to input sequence numpy file.'),
+        ('--output_seq_path', 'Path to output sequence numpy file.'),
         ('--model_params_bucket_path', 'Path to model params.'),
         ('--training_params_bucket_path', 'Path to training params.'),
     ]
@@ -34,24 +33,12 @@ if __name__ == '__main__':
         )
     args = parser.parse_args()
     input_sequence = np.load(f"{args.input_seq_path}.npy")
-    decoder_input_sequence = np.load(f"{args.decoder_input_path}.npy")
-    decoder_output_sequence = np.load(f"{args.decoder_output_path}.npy")
-    X_train, X_test, y_decoder_input_padded_train, y_decoder_input_padded_test, y_decoder_target_padded_train, y_decoder_target_padded_test = train_test_split(
-        input_sequence,
-        decoder_input_sequence,
-        decoder_output_sequence,
-        test_size=0.2,
-        random_state=42)
-    X_train, X_val, y_decoder_input_padded_train, y_decoder_input_padded_val, y_decoder_target_padded_train, y_decoder_target_padded_val = train_test_split(
-        X_train,
-        y_decoder_input_padded_train,
-        y_decoder_target_padded_train,
-        test_size=0.2,
-        random_state=42)
-    train_generator = DataGenerator(X_train, y_decoder_input_padded_train,
-                                    y_decoder_target_padded_train)
-    val_generator = DataGenerator(X_val, y_decoder_input_padded_val,
-                                  y_decoder_target_padded_val)
+    output_seqeuce = np.load(f"{args.output_seq_path}.npy")
+    X_train, X_val, y_train, y_val = train_test_split(input_sequence,
+                                                      output_seqeuce,
+                                                      random_state=42)
+    train_generator = DataGenerator(X_train, y_train)
+    val_generator = DataGenerator(X_val, y_val)
     Path("data").mkdir(exist_ok=True)
     download_blob(
         bucket_name=bucket_name,

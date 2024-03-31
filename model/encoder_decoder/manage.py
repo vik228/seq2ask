@@ -58,10 +58,11 @@ if __name__ == '__main__':
     )
     model_params = json.load(open("data/model_params.json"))
     training_params = json.load(open("data/training_params.json"))
-    training_params['callbacks'] = [
-        callback_map.get(callback['name'](**callback['kwargs']))
-        for callback in training_params.get('callbacks', [])
-    ]
+    if training_params.get('callbacks'):
+        training_params['callbacks'] = [
+            callback_map.get(callback['name'])(**callback['kwargs'])
+            for callback in training_params.get('callbacks', [])
+        ]
     logging.info("Model params are %s" % model_params)
     logging.info("Training params are %s" % training_params)
     training_params['train_generator'] = train_generator

@@ -37,7 +37,7 @@ class Optimizer:
         upload_to_gcs(encoder_path, encoder_model_path)
         upload_to_gcs(decoder_path, decoder_model_path)
         upload_to_gcs(model_path, model_bucket_path)
-        history_name = f"{self.model_name.split('.')[:-1]}_history.csv"
+        history_name = f"{self.model_name.split('.')[0]}_history.csv"
         history_df = pd.DataFrame(self.trainer.history.history)
         history_df.to_csv(f"data/{history_name}", index=False)
         upload_to_gcs(f"data/{history_name}",

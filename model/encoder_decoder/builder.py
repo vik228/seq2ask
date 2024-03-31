@@ -87,8 +87,6 @@ class Builder:
             self.model_params['layer_config'].get('encoder', []), 'encoder',
             self.model_params['encoder_input_len'])
         encoder_outputs, state_h, state_c = enc_outputs
-        print(state_h.shape)
-        print(state_c.shape)
         encoder_states = [state_h, state_c]  # Assuming LSTM for simplicity
         encoder_model = Model(inputs=enc_inputs,
                               outputs=encoder_states,

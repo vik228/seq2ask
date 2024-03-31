@@ -46,31 +46,28 @@ class Builder:
                           **kwargs):
         input_layer = Input(shape=(input_shape,),
                             name=f'{component_type}_input')
-        x = input_layer
+        embedding_layer = [
+            component_config for component_config in component_configs
+            if component_config['type'] == 'embedding'
+        ][0]
+        layer = self.create_layer(embedding_layer['type'],
+                                  args=embedding_layer['args'],
+                                  kwargs=embedding_layer['kwargs'])
+        x = layer(input_layer)
+        x = (x,)
+        component_configs = [
+            component_config for component_config in component_configs
+            if component_config['type'] != 'embedding'
+        ]
         for i, component_config in enumerate(component_configs):
             layer_type = component_config['type']
-
-            if layer_type == 'bidirectional':
-                # Special handling for bidirectional to wrap another layer
-                inner_layer_class = self.layer_mapping.get(
-                    component_config['inner_type'])
-                if not inner_layer_class:
-                    raise ValueError(
-                        f"Inner layer type {component_config['inner_type']} not supported"
-                    )
-                inner_layer = inner_layer_class(
-                    *component_config.get('args', []),
-                    **component_config.get('inner_kwargs', {}))
-                layer = Bidirectional(inner_layer,
-                                      **component_config.get('kwargs', {}))
+            layer = self.create_layer(layer_type,
+                                      component_config.get('args', []),
+                                      component_config.get('kwargs', {}))
+            if layer_type == 'lstm' and component_type == 'decoder' and i == 0:
+                x = layer(x[0], initial_state=kwargs.get('encoder_states'))
             else:
-                layer = self.create_layer(layer_type,
-                                          component_config.get('args', []),
-                                          component_config.get('kwargs', {}))
-            if layer_type == 'lstm' and component_type == 'decoder' and i == 1:
-                x = layer(x, initial_state=kwargs.get('encoder_states'))
-            else:
-                x = layer(x)
+                x = layer(x[0])
         return input_layer, x
 
     def configure_optimizer(self, optimizer_config):
@@ -85,11 +82,13 @@ class Builder:
         return optimizer
 
     def build_model(self):
+        print("hello")
         enc_inputs, enc_outputs = self.build_from_config(
             self.model_params['layer_config'].get('encoder', []), 'encoder',
             self.model_params['encoder_input_len'])
-
         encoder_outputs, state_h, state_c = enc_outputs
+        print(state_h.shape)
+        print(state_c.shape)
         encoder_states = [state_h, state_c]  # Assuming LSTM for simplicity
         encoder_model = Model(inputs=enc_inputs,
                               outputs=encoder_states,

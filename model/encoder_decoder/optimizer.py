@@ -34,8 +34,8 @@ class Optimizer:
         model_bucket_path = f"{self.model_bucket_path}{self.model_name}"
         encoder_model_path = f"{self.model_bucket_path}{self.encoder_model_name}"
         decoder_model_path = f"{self.model_bucket_path}{self.decoder_model_name}"
-        upload_to_gcs(encoder_model_path, model_bucket_path)
-        upload_to_gcs(decoder_model_path, model_bucket_path)
+        upload_to_gcs(encoder_path, encoder_model_path)
+        upload_to_gcs(decoder_path, decoder_model_path)
         upload_to_gcs(model_path, model_bucket_path)
         history_name = f"{self.model_name.split('.')[:-1]}_history.csv"
         history_df = pd.DataFrame(self.trainer.history.history)

@@ -12,6 +12,8 @@ from env import bucket_path_model
 from env import set_env_vars
 from optimizer import Optimizer
 from sklearn.model_selection import train_test_split
+from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.callbacks import ReduceLROnPlateau
 from utils import download_blob
 
 if __name__ == '__main__':
@@ -31,6 +33,10 @@ if __name__ == '__main__':
             default=None,
             help=arg[1],
         )
+    callback_map = {
+        'early_stopping': EarlyStopping,
+        'reduce_lr_on_plateau': ReduceLROnPlateau
+    }
     args = parser.parse_args()
     input_sequence = np.load(f"{args.input_seq_path}.npy")
     output_seqeuce = np.load(f"{args.output_seq_path}.npy")
@@ -52,6 +58,10 @@ if __name__ == '__main__':
     )
     model_params = json.load(open("data/model_params.json"))
     training_params = json.load(open("data/training_params.json"))
+    training_params['callbacks'] = [
+        callback_map.get(callback['name'](**callback['kwargs']))
+        for callback in training_params.get('callbacks', [])
+    ]
     logging.info("Model params are %s" % model_params)
     logging.info("Training params are %s" % training_params)
     training_params['train_generator'] = train_generator

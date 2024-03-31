@@ -87,7 +87,7 @@ class Builder:
     def build_model(self):
         enc_inputs, enc_outputs = self.build_from_config(
             self.model_params['layer_config'].get('encoder', []), 'encoder',
-            self.model_params['input_shape'])
+            self.model_params['encoder_input_len'])
 
         encoder_outputs, state_h, state_c = enc_outputs
         encoder_states = [state_h, state_c]  # Assuming LSTM for simplicity
@@ -98,7 +98,7 @@ class Builder:
         dec_inputs, dec_outputs = self.build_from_config(
             self.model_params['layer_config'].get('decoder', []),
             'decoder',
-            self.model_params['input_shape'],
+            self.model_params['decoder_input_len'],
             encoder_states=encoder_states)
         decoder_outputs, _, _ = dec_outputs
         output_layer_config = self.model_params['layer_config'].get(

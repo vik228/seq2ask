@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import pandas as pd
 from builder import Builder as EncoderDecoderBuilder
 from trainer import Trainer as EncoderDecoderTrainer
 from utils import upload_to_gcs
@@ -16,6 +17,8 @@ class Optimizer:
         self.trainer = None
         self.model_bucket_path = kwargs.get('model_bucket_path')
         self.model_name = kwargs.get('model_name')
+        self.encoder_model_name = kwargs.get('encoder_model_name')
+        self.decoder_model_name = kwargs.get('decoder_model_name')
 
     def build_and_train_model(self):
         self.model, self.encoder_model, self.decoder_model = self.model_builder.build_model(
@@ -29,8 +32,13 @@ class Optimizer:
         self.encoder_model.save(encoder_path)
         self.decoder_model.save(decoder_path)
         model_bucket_path = f"{self.model_bucket_path}{self.model_name}"
-        encoder_model_path = f"{self.model_bucket_path}{encoder_path}"
-        decoder_model_path = f"{self.model_bucket_path}{decoder_path}"
+        encoder_model_path = f"{self.model_bucket_path}{self.encoder_model_name}"
+        decoder_model_path = f"{self.model_bucket_path}{self.decoder_model_name}"
         upload_to_gcs(encoder_model_path, model_bucket_path)
         upload_to_gcs(decoder_model_path, model_bucket_path)
         upload_to_gcs(model_path, model_bucket_path)
+        history_name = f"{self.model_name.split('.')[:-1]}_history.csv"
+        history_df = pd.DataFrame(self.trainer.history.history)
+        history_df.to_csv(f"data/{history_name}", index=False)
+        upload_to_gcs(f"data/{history_name}",
+                      f"{self.model_bucket_path}{history_name}")
